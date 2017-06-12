@@ -24,12 +24,12 @@ public class Automata {
     transitions = new int[alphabet.length()][pattern.length() + 1];
     for (int i = 0; i < initialPattern.length; i++) {
       for (int j = 0; j < alphabet.length(); j++) {
-        transition(pattern, i, alphabet.charAt(j), transitions);
+        transition(pattern, i, alphabet.charAt(j));
       }
     }
   }
   
-  public void transition(String pattern, int state, char a, int[][] transitions) {
+  public void transition(String pattern, int state, char a) {
     if (pattern.indexOf(a) == -1) {
       return;
     }
