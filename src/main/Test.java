@@ -9,15 +9,25 @@ public class Test {
   
   @SuppressWarnings("unused")
   private static void testSuffixArray() {
-    String text = "mississippi";
+    String text1 = "mississippi";
+    String text2 = "banana";
+    String text3 = "trabajo";
+    String text4 = "cattcat";
+    String text5 = "attcatg";
+    String text = text1;
     SuffixArray suf = new SuffixArray(normalizeText(text));
+    System.out.print("SuffixArray: ");
+    for (int i = 0; i < suf.length(); i++) {
+      System.out.print(suf.get(i) + " ");
+    }
+    
   }
   
   private static String normalizeText(String text) {
     text = text.toLowerCase();
     text = Normalizer.normalize(text, Normalizer.Form.NFD);
     text = text.replaceAll("[^0-9a-z ]", "");
-    text = text + "$";
+    text = text + '\u0000';
     return text;
   }
 }
