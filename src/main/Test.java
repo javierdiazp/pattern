@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class Test {
   public static void main(String[] args) {
-    //mainTest("english.50MB.gz");
-    testSuffixArray();
+    mainTest("english.50MB");
+    //testSuffixArray();
   }
   
   @SuppressWarnings("unused")
@@ -28,8 +28,6 @@ public class Test {
     for (int i = 0; i < suf.length(); i++) {
       System.out.print(suf.get(i) + " ");
     }
-    String[] words = {"hola", "mundo"};
-    System.out.println(String.join("/", words));
   }
   
   private static String normalizeText(String text) {
@@ -40,7 +38,7 @@ public class Test {
     return text;
   }
   
-  @SuppressWarnings("unused")
+  //@SuppressWarnings("unused")
   private static void mainTest(String filename) {
     BufferedReader br = null;
     FileReader fr = null;
@@ -54,10 +52,14 @@ public class Test {
         String[] words;
         Random rnd = new Random();
         
+        System.out.println("Reading file...");
         while ((sCurrentLine = br.readLine()) != null) {
-          baseText += sCurrentLine;  
+          baseText += sCurrentLine;
+          System.out.println(sCurrentLine);
         }
+        System.out.println("Proccessing text...");
         baseText = normalizeText(baseText);
+        System.out.println("Calculating words...");
         words = baseText.split(" ");
         
         for (int i = 15; i <= 25; i++) {
@@ -72,20 +74,27 @@ public class Test {
             fw = new FileWriter("results_ " + i);
             bw = new BufferedWriter(fw);
             String word;
-            int[] occurrencies;
+            int occurrences;
             int length;
             long searchingStart, searchingTime = 0;
-            
+            bw.write("Test N = 2^" + i);
+            bw.newLine(); bw.newLine();
+            bw.write("Ocurrences:");
+            bw.newLine();
             for (int j = 0; j < N/10; j++) {
+              
               word = words[rnd.nextInt(N)];
               length = suffixArray.length();
               searchingStart = System.currentTimeMillis();
-              occurrencies = searchWord(suffixArray, text, word, 0, length);
+              occurrences = searchWord(suffixArray, text, word, 0, length);
+              bw.write(word + ": " + occurrences);
+              bw.newLine();
               searchingTime += (System.currentTimeMillis() - searchingStart)/word.length();
             }
             bw.write("Construction time: " + constructionTime);
             bw.newLine();
             bw.write("Searching time: " + searchingTime + " * pattern length");
+            
           } catch (IOException e) {
             e.printStackTrace();
           } finally {
@@ -114,15 +123,41 @@ public class Test {
     }
   }
   
-  private static int[] searchWord(SuffixArray suffixarray, String text, String word, int i, int j) {
+  private static int searchWord(SuffixArray suffixarray, String text, String word, int i, int j) {
+    int occurrences = 0;
     int m = (i+j)/2;
     int index = suffixarray.get(m);
     String candidate = text.substring(index, index + word.length());
-    if (word.equals(candidate)) {
-      for (int k = m+1; k+word.length() < suffixarray.length(); k++) {
-        
+    int cmp = word.compareTo(candidate);
+    
+    if ( !(i < j)) return occurrences;
+    
+    if (cmp == 0) {
+      occurrences++;
+      for (int k = m+1; k < j; k++) {
+        candidate = text.substring(k, k + word.length());
+        if (word.equals(candidate)) {
+          occurrences++;
+        } else {
+          break;
+        }
+      }
+      
+      for (int k = m-1; k >= i; k--) {
+        candidate = text.substring(k, k + word.length());
+        if (word.equals(candidate)) {
+          occurrences++;
+        } else {
+          break;
+        }
+      }
+    } else {
+      if (cmp < 0) {
+        occurrences += searchWord(suffixarray, text, word, m+1, j);
+      } else {
+        occurrences += searchWord(suffixarray, text, word, i, m);
       }
     }
-    return null;
+    return occurrences;
   }
 }
